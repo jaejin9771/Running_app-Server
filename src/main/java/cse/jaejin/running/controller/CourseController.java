@@ -1,73 +1,49 @@
 package cse.jaejin.running.controller;
 
-import cse.jaejin.running.converter.CourseConverter;
-import cse.jaejin.running.domain.Course;
-import cse.jaejin.running.domain.LocationPoint;
-import cse.jaejin.running.domain.User;
-import cse.jaejin.running.dto.CourseDetailDto;
-import cse.jaejin.running.dto.CourseDto;
-import cse.jaejin.running.dto.CourseSummaryDto;
-import cse.jaejin.running.repository.CourseRepository;
-import cse.jaejin.running.repository.UserRepository;
+import cse.jaejin.running.dto.*;
 import cse.jaejin.running.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/courses")
+@RequestMapping("/api/courses")
 @RequiredArgsConstructor
 public class CourseController {
 
     private final CourseService courseService;
-    private final CourseRepository courseRepository;
 
-    // 코스 등록
-    @PostMapping
-    public ResponseEntity<?> createCourse(@RequestBody CourseDto dto) {
-        Optional<Long> result = courseService.saveCourse(dto);
-
-        if (result.isPresent()) {
-            return ResponseEntity.ok(result.get());
-        } else {
-            return ResponseEntity.badRequest().body("User not found");
-        }
+    // 1. 러닝 기록을 기반으로 코스 생성
+    @PostMapping("/from-record")
+    public ResponseEntity<Long> createCourseFromRunningRecord(
+            @RequestBody CreateCourseFromRecordRequest request) {
+        Long courseId = courseService.createCourseFromRunningRecord(request);
+        return ResponseEntity.ok(courseId);
     }
 
-    // 전체 코스 조회
-    @GetMapping
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
-    }
-
-    // 특정 코스 조회
+    // 2. 코스 단건 조회
     @GetMapping("/{id}")
-    public ResponseEntity<CourseDetailDto> getCourseDetail(@PathVariable Long id) {
-        return courseRepository.findById(id)
-                .map(CourseConverter::toDetailDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<CourseResponseDto> getCourse(@PathVariable Long id) {
+        return ResponseEntity.ok(courseService.getCourse(id));
     }
 
+    // 3. 전체 코스 조회
+    @GetMapping
+    public ResponseEntity<List<CourseResponseDto>> getAllCourses() {
+        return ResponseEntity.ok(courseService.getAllCourses());
+    }
 
-    // 특정 유저 코스 조회
+    // 4. 사용자별 코스 조회
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CourseSummaryDto>> getCoursesByUser(@PathVariable Long userId) {
-        List<Course> courses = courseRepository.findByUserId(userId);
-        if (courses.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        List<CourseSummaryDto> dtos = courses.stream()
-                .map(CourseConverter::toSummaryDto)
-                .toList();
-
-        return ResponseEntity.ok(dtos);
+    public ResponseEntity<List<CourseResponseDto>> getCoursesByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(courseService.getCoursesByUser(userId));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<CourseResponseDto>> searchByCourseTitle(@RequestParam String courseTitle) {
+        return ResponseEntity.ok(courseService.searchByCourseTitle(courseTitle));
+    }
 
 }
-

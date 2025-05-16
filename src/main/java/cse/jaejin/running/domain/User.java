@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Users")
@@ -34,8 +36,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RunningRecord> runningRecords = new ArrayList<>();
+
     public enum Role {
         USER, ADMIN
+    }
+
+    public void addRunningRecord(RunningRecord record) {
+        runningRecords.add(record);
+        record.setUser(this);
     }
 
 }

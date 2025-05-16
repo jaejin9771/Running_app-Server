@@ -23,6 +23,9 @@ public class SharedCourse {
     private Course course;
 
     @Column(nullable = false)
+    private String category;
+
+    @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")

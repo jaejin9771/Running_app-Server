@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,29 +16,21 @@ public class Course {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(nullable = false)
+    private String courseTitle; // 코스 이름 추가
 
     @Column(nullable = false)
     private double distance; // km
 
-    @Column(nullable = false)
-    private int duration; // 초 단위
-
-    @Column(nullable = false)
-    private LocalDateTime startTime;
-
-    @Column(nullable = false)
-    private LocalDateTime endTime;
-
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LocationPoint> points = new ArrayList<>();
+    private List<CourseLocationPoint> points = new ArrayList<>();
 
     // 연관관계 편의 메서드
-    public void addPoint(LocationPoint point) {
+    public void addPoint(CourseLocationPoint point) {
         points.add(point);
         point.setCourse(this);
     }
-    // Getter, Setter, Constructor
 }
-
