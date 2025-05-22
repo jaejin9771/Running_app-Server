@@ -48,5 +48,23 @@ public class User {
         record.setUser(this);
     }
 
+    // 누적 거리 계산 (단위: km)
+    public double getTotalDistance() {
+        return runningRecords.stream()
+                .mapToDouble(RunningRecord::getDistance)
+                .sum();
+    }
+
+    // 티어 계산
+    public String getTier() {
+        double total = getTotalDistance();
+
+        if (total >= 1000) return "Platinum";
+        if (total >= 500) return "Gold";
+        if (total >= 200) return "Silver";
+        if (total >= 50) return "Bronze";
+        return "Beginner";
+    }
+
 }
 
