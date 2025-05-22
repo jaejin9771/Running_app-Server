@@ -1,13 +1,13 @@
 package cse.jaejin.running.dto;
 
+import cse.jaejin.running.domain.User;
 import cse.jaejin.running.domain.User.Role;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Getter @Setter
 public class UserResponse {
     private Long id;
     private String username;
@@ -16,4 +16,22 @@ public class UserResponse {
     private String phone;
     private LocalDate birthDate;
     private Role role;
+
+    private double totalDistance; // 누적 거리
+    private String tier;          // 티어
+
+    public static UserResponse fromEntity(User user) {
+        UserResponse dto = new UserResponse();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setName(user.getName());
+        dto.setAge(user.getAge());
+        dto.setPhone(user.getPhone());
+        dto.setBirthDate(user.getBirthDate());
+        dto.setRole(user.getRole());
+        dto.setTotalDistance(user.getTotalDistance());
+        dto.setTier(user.getTier());
+        return dto;
+    }
 }
+

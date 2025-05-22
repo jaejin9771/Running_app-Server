@@ -1,4 +1,5 @@
 package cse.jaejin.running.domain;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,8 +24,12 @@ public class RunningRecord {
 
     // 어떤 코스를 달렸는지
     @ManyToOne
-    @JoinColumn(name = "courseId", nullable = false)
+    @JoinColumn(name = "courseId")
     private Course course;
+
+    // 총 거리 (단위: km)
+    @Column(nullable = false)
+    private double distance;
 
     // 소요 시간 (초 단위)
     @Column(nullable = false)
@@ -44,5 +49,11 @@ public class RunningRecord {
     public void addPoint(RunningLocationPoint point) {
         points.add(point);
         point.setRunningRecord(this);
+    }
+
+    // 평균 속도 계산 (단위: km/h)
+    public double getAverageSpeed() {
+        if (duration == 0) return 0.0;
+        return (distance / duration) * 3600;
     }
 }
