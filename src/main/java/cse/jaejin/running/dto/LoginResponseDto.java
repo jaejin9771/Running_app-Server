@@ -15,8 +15,8 @@ public class LoginResponseDto {
 
     @Getter @Setter
     public static class UserDto {
+        private Long id;
         private String username;
-        private String password;  // 실제 서비스에서는 생략하거나 마스킹
         private String name;
         private int age;
         private String phone;
@@ -26,8 +26,8 @@ public class LoginResponseDto {
 
     public static UserDto fromEntity(User user) {
         UserDto dto = new UserDto();
+        dto.setId(user.getId());
         dto.setUsername(user.getUsername());
-        dto.setPassword(user.getPassword());
         dto.setName(user.getName());
         dto.setAge(user.getAge());
         dto.setPhone(user.getPhone());

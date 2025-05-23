@@ -1,10 +1,7 @@
 package cse.jaejin.running.controller;
 
 import cse.jaejin.running.domain.User;
-import cse.jaejin.running.dto.LoginRequestDto;
-import cse.jaejin.running.dto.LoginResponseDto;
-import cse.jaejin.running.dto.UserRequestDto;
-import cse.jaejin.running.dto.UserResponseDto;
+import cse.jaejin.running.dto.*;
 import cse.jaejin.running.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +21,7 @@ public class UserController {
 
     //회원 가입
     @PostMapping
-    public ResponseEntity<Long> registerUser(@RequestBody UserRequestDto request) {
+    public ResponseEntity<RegisterResponseDto> registerUser(@RequestBody UserRequestDto request) {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
@@ -34,8 +31,8 @@ public class UserController {
         user.setBirthDate(request.getBirthDate());
         user.setRole(request.getRole());
 
-        Long id = userService.register(user);
-        return ResponseEntity.ok(id);
+        userService.register(user);
+        return ResponseEntity.ok(new RegisterResponseDto(true, "회원가입 성공"));
     }
 
     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
