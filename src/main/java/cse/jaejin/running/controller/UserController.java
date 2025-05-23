@@ -1,10 +1,10 @@
 package cse.jaejin.running.controller;
 
 import cse.jaejin.running.domain.User;
-import cse.jaejin.running.dto.LoginRequest;
-import cse.jaejin.running.dto.LoginResponse;
-import cse.jaejin.running.dto.UserRequest;
-import cse.jaejin.running.dto.UserResponse;
+import cse.jaejin.running.dto.LoginRequestDto;
+import cse.jaejin.running.dto.LoginResponseDto;
+import cse.jaejin.running.dto.UserRequestDto;
+import cse.jaejin.running.dto.UserResponseDto;
 import cse.jaejin.running.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +24,7 @@ public class UserController {
 
     //회원 가입
     @PostMapping
-    public ResponseEntity<Long> registerUser(@RequestBody UserRequest request) {
+    public ResponseEntity<Long> registerUser(@RequestBody UserRequestDto request) {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
@@ -38,10 +38,10 @@ public class UserController {
         return ResponseEntity.ok(id);
     }
 
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
         List<User> users = userService.findUsers();
-        List<UserResponse> response = users.stream().map(user -> {
-            UserResponse dto = new UserResponse();
+        List<UserResponseDto> response = users.stream().map(user -> {
+            UserResponseDto dto = new UserResponseDto();
             dto.setId(user.getId());
             dto.setUsername(user.getUsername());
             dto.setName(user.getName());
@@ -56,27 +56,27 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request) {
         try {
             // 서비스 레이어에서 로그인 검증
             User user = userService.login(request.getUsername(), request.getPassword());
 
             // 로그인 성공 시 사용자 정보 DTO로 변환 후 반환
-            LoginResponse.UserDto dto = LoginResponse.fromEntity(user);
-            return ResponseEntity.ok(new LoginResponse(true, "로그인 성공", dto));
+            LoginResponseDto.UserDto dto = LoginResponseDto.fromEntity(user);
+            return ResponseEntity.ok(new LoginResponseDto(true, "로그인 성공", dto));
 
         } catch (IllegalArgumentException e) {
             // 로그인 실패 시 예외 메시지 포함하여 401 Unauthorized 반환
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body(new LoginResponse(false, e.getMessage(), null));
+                    .body(new LoginResponseDto(false, e.getMessage(), null));
         }
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getCurrentUser(@RequestParam Long userId) {
+    public ResponseEntity<UserResponseDto> getCurrentUser(@RequestParam Long userId) {
         User user = userService.findById(userId);
-        return ResponseEntity.ok(UserResponse.fromEntity(user));
+        return ResponseEntity.ok(UserResponseDto.fromEntity(user));
     }
 
 

@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Getter @Setter
-public class UserResponse {
+public class UserResponseDto {
     private Long id;
     private String username;
     private String name;
@@ -20,8 +20,8 @@ public class UserResponse {
     private double totalDistance; // 누적 거리
     private String tier;          // 티어
 
-    public static UserResponse fromEntity(User user) {
-        UserResponse dto = new UserResponse();
+    public static UserResponseDto fromEntity(User user) {
+        UserResponseDto dto = new UserResponseDto();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setName(user.getName());

@@ -6,7 +6,7 @@ import cse.jaejin.running.domain.User.Role;
 import java.time.LocalDate;
 
 @Data
-public class UserRequest {
+public class UserRequestDto {
     private String username;
     private String password;
     private String name;
