@@ -35,6 +35,10 @@ public class RunningRecord {
     @Column(nullable = false)
     private int duration;
 
+    // 달린 지역
+    @Column(nullable = false)
+    private String location;
+
     // 달린 날짜
     @Column(nullable = false)
     private LocalDate runDate;
