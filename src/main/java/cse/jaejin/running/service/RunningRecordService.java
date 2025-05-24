@@ -34,8 +34,7 @@ public class RunningRecordService {
         record.setCourse(course);
         record.setDistance(dto.getDistance());
         record.setDuration(dto.getDuration());
-        record.setStartTime(dto.getStartTime());
-        record.setEndTime(dto.getEndTime());
+        record.setRunDate(dto.getRunDate());
 
         if (dto.getPoints() != null) {
             for (LocationPointDto pointDto : dto.getPoints()) {
@@ -76,8 +75,7 @@ public class RunningRecordService {
         dto.setCourseId(record.getCourse() != null ? record.getCourse().getId() : null);
         dto.setDistance(record.getDistance());
         dto.setDuration(record.getDuration());
-        dto.setStartTime(record.getStartTime());
-        dto.setEndTime(record.getEndTime());
+        dto.setRunDate(record.getRunDate());
         dto.setAverageSpeed(record.getAverageSpeed());
 
         List<LocationPointDto> points = record.getPoints().stream().map(p -> {

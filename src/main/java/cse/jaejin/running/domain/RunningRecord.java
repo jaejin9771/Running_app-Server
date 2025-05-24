@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,13 +35,9 @@ public class RunningRecord {
     @Column(nullable = false)
     private int duration;
 
-    // 시작 시각
+    // 달린 날짜
     @Column(nullable = false)
-    private LocalDateTime startTime;
-
-    // 종료 시각
-    @Column(nullable = false)
-    private LocalDateTime endTime;
+    private LocalDate runDate;
 
     @OneToMany(mappedBy = "runningRecord", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RunningLocationPoint> points = new ArrayList<>();
