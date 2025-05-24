@@ -22,7 +22,7 @@ public class CourseService {
      * 러닝 기록(RunningRecord)을 기반으로 코스를 생성하는 메서드
      */
     @Transactional
-    public Long createCourseFromRunningRecord(CreateCourseFromRecordRequest request) {
+    public Long createCourseFromRunningRecord(CourseRequestDto request) {
         // 사용자 정보 조회 (예외 발생 시 404 대체용 예외 처리)
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -36,6 +36,7 @@ public class CourseService {
         course.setUser(user);  // 사용자 설정
         course.setDistance(calculateDistance(record));  // 거리 계산 (추후 구현 필요)
         course.setCourseTitle(request.getCourseTitle());
+        course.setLocation(record.getLocation());
 
         // 러닝 기록의 좌표를 CourseLocationPoint로 복사하여 Course에 추가
         for (RunningLocationPoint rp : record.getPoints()) {
@@ -106,6 +107,7 @@ public class CourseService {
         dto.setUserId(course.getUser().getId());
         dto.setDistance(course.getDistance());
         dto.setCourseTitle(course.getCourseTitle());
+        dto.setLocation(course.getLocation());
 
         // 위치 좌표 리스트를 DTO로 변환
         List<LocationPointDto> pointDtos = course.getPoints().stream().map(p -> {

@@ -8,7 +8,6 @@ import java.util.List;
 @Getter @Setter
 public class CourseRequestDto {
     private Long userId;
+    private Long runningRecordId;
     private String courseTitle;
-    private double distance;
-    private List<LocationPointDto> points;
 }

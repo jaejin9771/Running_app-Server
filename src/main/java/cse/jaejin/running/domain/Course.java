@@ -25,6 +25,9 @@ public class Course {
     @Column(nullable = false)
     private double distance; // km
 
+    @Column(nullable = false)
+    private String location;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CourseLocationPoint> points = new ArrayList<>();
 

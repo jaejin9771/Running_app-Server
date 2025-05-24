@@ -18,7 +18,7 @@ public class CourseController {
     // 1. 러닝 기록을 기반으로 코스 생성
     @PostMapping("/from-record")
     public ResponseEntity<Long> createCourseFromRunningRecord(
-            @RequestBody CreateCourseFromRecordRequest request) {
+            @RequestBody CourseRequestDto request) {
         Long courseId = courseService.createCourseFromRunningRecord(request);
         return ResponseEntity.ok(courseId);
     }

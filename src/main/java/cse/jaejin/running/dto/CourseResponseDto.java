@@ -11,5 +11,6 @@ public class CourseResponseDto {
     private String courseTitle;
     private Long userId;
     private double distance;
+    private String location;
     private List<LocationPointDto> points;
 }
