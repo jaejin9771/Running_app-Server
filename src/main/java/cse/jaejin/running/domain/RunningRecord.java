@@ -24,7 +24,7 @@ public class RunningRecord {
 
     // 어떤 코스를 달렸는지
     @ManyToOne
-    @JoinColumn(name = "courseId")
+    @JoinColumn(name = "courseId", nullable = true)
     private Course course;
 
     // 총 거리 (단위: km)
