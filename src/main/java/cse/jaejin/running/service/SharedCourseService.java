@@ -2,18 +2,20 @@ package cse.jaejin.running.service;
 
 import cse.jaejin.running.domain.Course;
 import cse.jaejin.running.domain.SharedCourse;
-import cse.jaejin.running.domain.SharedCourseImage;
 import cse.jaejin.running.domain.User;
+import cse.jaejin.running.domain.Photo;
+import cse.jaejin.running.domain.PhotoTargetType;
 import cse.jaejin.running.dto.SharedCourseRequestDto;
 import cse.jaejin.running.dto.SharedCourseResponseDto;
 import cse.jaejin.running.repository.CourseRepository;
-import cse.jaejin.running.repository.SharedCourseImageRepository;
+import cse.jaejin.running.repository.PhotoRepository;
 import cse.jaejin.running.repository.SharedCourseRepository;
 import cse.jaejin.running.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime; // LocalDateTime 임포트 추가
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
 public class SharedCourseService {
 
     private final SharedCourseRepository sharedCourseRepository;
-    private final SharedCourseImageRepository imageRepository;
+    private final PhotoRepository photoRepository;
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
 
@@ -37,6 +39,8 @@ public class SharedCourseService {
         if (!sharedCourseRepository.existsById(id)) {
             throw new IllegalArgumentException("게시글이 존재하지 않습니다.");
         }
+        // 해당 SharedCourse와 연관된 모든 사진 삭제
+        photoRepository.deleteByTargetIdAndTargetType(id, PhotoTargetType.SHARED_COURSE);
         sharedCourseRepository.deleteById(id);
     }
 
@@ -55,14 +59,21 @@ public class SharedCourseService {
         course.setCategory(requestDto.getCategory());
         course.setTitle(requestDto.getTitle());
         course.setContent(requestDto.getContent());
+        // SharedCourse 엔티티에 @PreUpdate가 설정되어 있다면 updatedAt은 자동으로 갱신됩니다.
+        // 명시적으로 설정하려면 course.setUpdatedAt(LocalDateTime.now());를 추가할 수 있습니다.
 
-        // 기존 이미지 삭제 후 새 이미지 저장
-        imageRepository.deleteAll(imageRepository.findBySharedCourseId(id));
+        // 기존 사진 삭제 (SharedCourseId와 타입으로 삭제)
+        photoRepository.deleteByTargetIdAndTargetType(id, PhotoTargetType.SHARED_COURSE);
+
+        // 새 사진 저장
+        int orderIndex = 0; // 사진 순서 초기화
         for (String url : requestDto.getImageUrls()) {
-            SharedCourseImage image = new SharedCourseImage();
-            image.setSharedCourse(course);
-            image.setImageUrl(url);
-            imageRepository.save(image);
+            Photo photo = new Photo();
+            photo.setTargetId(course.getId()); // SharedCourse의 ID를 targetId로 설정
+            photo.setTargetType(PhotoTargetType.SHARED_COURSE); // PhotoTargetType.SHARED_COURSE 지정
+            photo.setImageUrl(url);
+            photo.setOrderIndex(orderIndex++); // 순서 부여
+            photoRepository.save(photo);
         }
     }
 
@@ -80,14 +91,20 @@ public class SharedCourseService {
         sharedCourse.setCategory(requestDto.getCategory());
         sharedCourse.setTitle(requestDto.getTitle());
         sharedCourse.setContent(requestDto.getContent());
+        // createdAt은 SharedCourse 엔티티의 @PrePersist 또는 초기화 로직에 따라 자동으로 설정됩니다.
 
+        // SharedCourse를 먼저 저장하여 ID를 확보
         SharedCourse saved = sharedCourseRepository.save(sharedCourse);
 
+        // 사진 저장
+        int orderIndex = 0; // 사진 순서 초기화
         for (String url : requestDto.getImageUrls()) {
-            SharedCourseImage image = new SharedCourseImage();
-            image.setSharedCourse(saved);
-            image.setImageUrl(url);
-            imageRepository.save(image);
+            Photo photo = new Photo();
+            photo.setTargetId(saved.getId()); // 저장된 SharedCourse의 ID를 targetId로 설정
+            photo.setTargetType(PhotoTargetType.SHARED_COURSE); // PhotoTargetType.SHARED_COURSE 지정
+            photo.setImageUrl(url);
+            photo.setOrderIndex(orderIndex++); // 순서 부여
+            photoRepository.save(photo);
         }
 
         return saved.getId();
@@ -97,14 +114,16 @@ public class SharedCourseService {
         return sharedCourseRepository.findAll().stream().map(course -> {
             SharedCourseResponseDto dto = new SharedCourseResponseDto();
             dto.setId(course.getId());
-            dto.setUsername(course.getUser().getUsername()); // 필요 시
+            dto.setUsername(course.getUser().getUsername());
             dto.setCategory(course.getCategory());
             dto.setTitle(course.getTitle());
             dto.setContent(course.getContent());
-            dto.setCreatedAt(course.getCreatedAt());
+            dto.setCreatedAt(course.getCreatedAt()); // createdAt 정보 추가
+            dto.setUpdatedAt(course.getUpdatedAt()); // updatedAt 정보 추가
 
-            List<String> imageUrls = imageRepository.findBySharedCourseId(course.getId())
-                    .stream().map(SharedCourseImage::getImageUrl).toList();
+            List<String> imageUrls = photoRepository.findByTargetIdAndTargetTypeOrderByOrderIndexAsc(
+                            course.getId(), PhotoTargetType.SHARED_COURSE)
+                    .stream().map(Photo::getImageUrl).toList();
             dto.setImageUrls(imageUrls);
             return dto;
         }).collect(Collectors.toList());
@@ -122,16 +141,17 @@ public class SharedCourseService {
     private SharedCourseResponseDto convertToDto(SharedCourse course) {
         SharedCourseResponseDto dto = new SharedCourseResponseDto();
         dto.setId(course.getId());
-        dto.setUsername(course.getUser().getUsername()); // 필요시 이름 대신 id도 가능
+        dto.setUsername(course.getUser().getUsername());
         dto.setCategory(course.getCategory());
         dto.setTitle(course.getTitle());
         dto.setContent(course.getContent());
-        dto.setCreatedAt(course.getCreatedAt());
+        dto.setCreatedAt(course.getCreatedAt()); // createdAt 정보 추가
+        dto.setUpdatedAt(course.getUpdatedAt()); // updatedAt 정보 추가
 
-        List<String> imageUrls = imageRepository.findBySharedCourseId(course.getId())
-                .stream().map(SharedCourseImage::getImageUrl).toList();
+        List<String> imageUrls = photoRepository.findByTargetIdAndTargetTypeOrderByOrderIndexAsc(
+                        course.getId(), PhotoTargetType.SHARED_COURSE)
+                .stream().map(Photo::getImageUrl).toList();
         dto.setImageUrls(imageUrls);
         return dto;
     }
 }
-

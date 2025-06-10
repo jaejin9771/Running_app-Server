@@ -1,31 +1,27 @@
 package cse.jaejin.running.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Entity
-@Table(name = "SharedCourses")
+@Table(name = "Posts") // 일반 게시글 테이블
 @Getter @Setter
-@NoArgsConstructor // Lombok 사용 시 기본 생성자 추가
-public class SharedCourse {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY) // 사용자 정보는 지연 로딩
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", nullable = false)
     private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY) // 코스 정보는 지연 로딩
-    @JoinColumn(name = "courseId", nullable = false)
-    private Course course;
-
-    @Column(nullable = false)
-    private String category;
 
     @Column(nullable = false)
     private String title;
@@ -37,14 +33,13 @@ public class SharedCourse {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now(); // 업데이트 시간 추가 (필요 시)
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
-    // --- 좋아요 및 댓글 수 (캐싱 목적) ---
     @Column(nullable = false)
     private int likeCount = 0;
 
