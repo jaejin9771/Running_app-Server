@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Entity
 @Table(name = "Posts") // 일반 게시글 테이블

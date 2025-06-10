@@ -1,5 +1,7 @@
-package cse.jaejin.running.domain;
+package cse.jaejin.running.domain.like;
 
+import cse.jaejin.running.domain.SharedCourse;
+import cse.jaejin.running.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
