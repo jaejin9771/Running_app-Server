@@ -1,7 +1,8 @@
 package cse.jaejin.running.service;
 
-import cse.jaejin.running.domain.User;
-import cse.jaejin.running.repository.UserRepository;
+import cse.jaejin.running.user.User;
+import cse.jaejin.running.user.UserRepository;
+import cse.jaejin.running.user.UserService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
