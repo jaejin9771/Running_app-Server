@@ -55,9 +55,16 @@ public class FriendshipService {
         reverse.setCreatedAt(LocalDateTime.now());
 
         // 중복 방지
-        if (friendshipRepository.findByUserAndFriend(reverse.getUser(), reverse.getFriend()).isEmpty()) {
-            friendshipRepository.save(reverse);
-        }
+        friendshipRepository.findByUserAndFriend(reverse.getUser(), reverse.getFriend())
+                .ifPresentOrElse(
+                        existing -> {
+                            if (existing.getStatus() == FriendshipStatus.REQUESTED) {
+                                existing.setStatus(FriendshipStatus.ACCEPTED);
+                                friendshipRepository.save(existing);
+                            }
+                        },
+                        () -> friendshipRepository.save(reverse)
+                );
     }
 
 
@@ -80,5 +87,55 @@ public class FriendshipService {
         dto.setStatus(friendship.getStatus());
         dto.setCreatedAt(friendship.getCreatedAt());
         return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public List<FriendshipResponseDto> getSentFriendRequests(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
+        return friendshipRepository.findByUser(user).stream()
+                .filter(f -> f.getStatus() == FriendshipStatus.REQUESTED)
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<FriendshipResponseDto> getReceivedFriendRequests(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
+        return friendshipRepository.findByFriend(user).stream()
+                .filter(f -> f.getStatus() == FriendshipStatus.REQUESTED)
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteFriendship(Long userId, Long friendId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new IllegalArgumentException("친구 없음"));
+
+        // 양방향 관계 삭제
+        friendshipRepository.findByUserAndFriend(user, friend)
+                .ifPresent(friendshipRepository::delete);
+
+        friendshipRepository.findByUserAndFriend(friend, user)
+                .ifPresent(friendshipRepository::delete);
+    }
+
+    @Transactional
+    public void rejectFriendRequest(Long id) {
+        Friendship request = friendshipRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("요청 없음"));
+
+        // 상태가 REQUESTED인 경우에만 거절 가능
+        if (request.getStatus() != FriendshipStatus.REQUESTED) {
+            throw new IllegalStateException("이미 수락되었거나 유효하지 않은 요청입니다.");
+        }
+
+        friendshipRepository.delete(request);
     }
 }
