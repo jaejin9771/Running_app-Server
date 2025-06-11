@@ -37,7 +37,7 @@ public class CourseService {
         // 새로운 Course 엔티티 생성
         Course course = new Course();
         course.setUser(user);  // 사용자 설정
-        course.setDistance(calculateDistance(record));  // 거리 계산 (추후 구현 필요)
+        course.setDistance(record.getDistance());
         course.setCourseTitle(request.getCourseTitle());
         course.setLocation(record.getLocation());
 
@@ -51,13 +51,6 @@ public class CourseService {
 
         // 저장 후 생성된 코스의 ID 반환
         return courseRepository.save(course).getId();
-    }
-
-    /**
-     * 러닝 기록으로부터 총 거리를 계산하는 로직 (현재는 더미값, 추후 좌표 거리 계산 알고리즘 적용 예정)
-     */
-    private double calculateDistance(RunningRecord record) {
-        return 0.0; // TODO: Haversine 공식을 이용한 거리 계산 추가 예정
     }
 
     /**
