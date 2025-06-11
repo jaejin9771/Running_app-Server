@@ -2,12 +2,14 @@ package cse.jaejin.running.friendship;
 
 import cse.jaejin.running.user.User;
 import cse.jaejin.running.user.UserRepository;
+import cse.jaejin.running.user.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -138,4 +140,30 @@ public class FriendshipService {
 
         friendshipRepository.delete(request);
     }
+
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> searchAvailableUsers(Long requesterId, String keyword) {
+        User requester = userRepository.findById(requesterId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
+        // keyword로 검색된 유저들 중
+        List<User> allMatchingUsers = userRepository.findByUsernameContainingIgnoreCase(keyword);
+
+        // 이미 친구 요청을 보냈거나 받은 사용자들
+        List<Friendship> relations = friendshipRepository.findAllByUserOrFriend(requester, requester);
+
+        Set<Long> excludedUserIds = relations.stream()
+                .map(f -> {
+                    if (f.getUser().getId().equals(requesterId)) return f.getFriend().getId();
+                    else return f.getUser().getId();
+                })
+                .collect(Collectors.toSet());
+        excludedUserIds.add(requesterId); // 본인도 제외
+
+        return allMatchingUsers.stream()
+                .filter(user -> !excludedUserIds.contains(user.getId()))
+                .map(UserResponseDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 }

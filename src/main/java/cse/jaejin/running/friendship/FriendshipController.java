@@ -1,5 +1,6 @@
 package cse.jaejin.running.friendship;
 
+import cse.jaejin.running.user.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +52,13 @@ public class FriendshipController {
     public ResponseEntity<List<FriendshipResponseDto>> getReceivedRequests(@PathVariable Long userId) {
         List<FriendshipResponseDto> received = friendshipService.getReceivedFriendRequests(userId);
         return ResponseEntity.ok(received);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<UserResponseDto>> searchAvailableUsers(
+            @RequestParam Long requesterId,
+            @RequestParam String keyword) {
+        List<UserResponseDto> result = friendshipService.searchAvailableUsers(requesterId, keyword);
+        return ResponseEntity.ok(result);
     }
 }
