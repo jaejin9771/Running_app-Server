@@ -1,6 +1,7 @@
 package cse.jaejin.running.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 회원가입
@@ -23,6 +25,11 @@ public class UserService {
     @Transactional
     public Long register(User user) {
         validateDuplicateUser(user);
+        
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
         userRepository.save(user);
         return user.getId();
     }

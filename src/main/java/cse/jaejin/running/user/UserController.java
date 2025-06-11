@@ -1,15 +1,19 @@
 package cse.jaejin.running.user;
 
+import cse.jaejin.running.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
@@ -49,28 +53,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request) {
-        try {
-            // 서비스 레이어에서 로그인 검증
-            User user = userService.login(request.getUsername(), request.getPassword());
-
-            // 로그인 성공 시 사용자 정보 DTO로 변환 후 반환
-            LoginResponseDto.UserDto dto = LoginResponseDto.fromEntity(user);
-            return ResponseEntity.ok(new LoginResponseDto(true, "로그인 성공", dto));
-
-        } catch (IllegalArgumentException e) {
-            // 로그인 실패 시 예외 메시지 포함하여 401 Unauthorized 반환
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(new LoginResponseDto(false, e.getMessage(), null));
-        }
-    }
-
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getCurrentUser(@RequestParam Long userId) {
-        User user = userService.findById(userId);
-        return ResponseEntity.ok(UserResponseDto.fromEntity(user));
+    public LoginResponseDto.UserDto getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = userDetails.getUser(); // JWT에서 인증된 사용자 정보
+        return LoginResponseDto.fromEntity(user);
     }
 
     @GetMapping("/search")

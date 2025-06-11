@@ -11,6 +11,7 @@ public class LoginResponseDto {
     private boolean success;
     private String message;
     private UserDto user;
+    private String token;
 
     @Getter @Setter
     public static class UserDto {
