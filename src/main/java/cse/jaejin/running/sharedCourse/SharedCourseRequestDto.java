@@ -9,7 +9,6 @@ import java.util.List;
 public class SharedCourseRequestDto {
     private Long userId;
     private Long courseId;
-    private String category;
     private String title;
     private String content;
     private List<String> imageUrls;

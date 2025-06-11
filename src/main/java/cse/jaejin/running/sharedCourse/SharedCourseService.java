@@ -51,7 +51,6 @@ public class SharedCourseService {
 
         course.setCourse(newCourse);
         course.setUser(newUser);
-        course.setCategory(requestDto.getCategory());
         course.setTitle(requestDto.getTitle());
         course.setContent(requestDto.getContent());
         // SharedCourse 엔티티에 @PreUpdate가 설정되어 있다면 updatedAt은 자동으로 갱신됩니다.
@@ -83,7 +82,6 @@ public class SharedCourseService {
         SharedCourse sharedCourse = new SharedCourse();
         sharedCourse.setUser(user);
         sharedCourse.setCourse(course);
-        sharedCourse.setCategory(requestDto.getCategory());
         sharedCourse.setTitle(requestDto.getTitle());
         sharedCourse.setContent(requestDto.getContent());
         // createdAt은 SharedCourse 엔티티의 @PrePersist 또는 초기화 로직에 따라 자동으로 설정됩니다.
@@ -110,7 +108,6 @@ public class SharedCourseService {
             SharedCourseResponseDto dto = new SharedCourseResponseDto();
             dto.setId(course.getId());
             dto.setUsername(course.getUser().getUsername());
-            dto.setCategory(course.getCategory());
             dto.setTitle(course.getTitle());
             dto.setContent(course.getContent());
             dto.setCreatedAt(course.getCreatedAt()); // createdAt 정보 추가
@@ -124,10 +121,6 @@ public class SharedCourseService {
         }).collect(Collectors.toList());
     }
 
-    public List<SharedCourseResponseDto> getSharedCoursesByCategory(String category) {
-        return sharedCourseRepository.findByCategory(category).stream().map(this::convertToDto).toList();
-    }
-
     public List<SharedCourseResponseDto> getSharedCoursesByUserId(Long userId) {
         return sharedCourseRepository.findByUserId(userId).stream().map(this::convertToDto).toList();
     }
@@ -137,7 +130,6 @@ public class SharedCourseService {
         SharedCourseResponseDto dto = new SharedCourseResponseDto();
         dto.setId(course.getId());
         dto.setUsername(course.getUser().getUsername());
-        dto.setCategory(course.getCategory());
         dto.setTitle(course.getTitle());
         dto.setContent(course.getContent());
         dto.setCreatedAt(course.getCreatedAt()); // createdAt 정보 추가

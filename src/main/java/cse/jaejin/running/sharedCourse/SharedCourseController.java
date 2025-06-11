@@ -42,11 +42,6 @@ public class SharedCourseController {
         return ResponseEntity.ok(sharedCourseService.getAllSharedCourses());
     }
 
-    @GetMapping("/category")
-    public ResponseEntity<List<SharedCourseResponseDto>> getByCategory(@RequestParam String category) {
-        return ResponseEntity.ok(sharedCourseService.getSharedCoursesByCategory(category));
-    }
-
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<SharedCourseResponseDto>> getByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(sharedCourseService.getSharedCoursesByUserId(userId));
