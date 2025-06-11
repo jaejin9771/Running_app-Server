@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,71 +23,77 @@ public class PostService {
 
     /**
      * 특정 ID의 게시글을 조회합니다.
-     * 사진 정보도 함께 DTO로 변환하여 반환합니다.
      */
     public PostResponseDto getPostById(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-        return convertToDto(post);
+        List<Photo> photos = photoRepository.findByTargetIdAndTargetTypeOrderByOrderIndexAsc(id, PhotoTargetType.POST);
+        return PostResponseDto.fromEntity(post, photos);
     }
 
     /**
      * 새로운 게시글을 생성합니다.
-     * 게시글 정보와 함께 첨부된 사진들도 저장합니다.
      */
     @Transactional
     public Long createPost(PostRequestDto requestDto) {
         User user = userRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        PostCategory category;
+        try {
+            category = PostCategory.valueOf(requestDto.getCategory());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("유효하지 않은 카테고리입니다.");
+        }
+
         Post post = new Post();
         post.setUser(user);
         post.setTitle(requestDto.getTitle());
         post.setContent(requestDto.getContent());
-        // createdAt은 엔티티 초기화 시 자동으로 설정됩니다.
-        // likeCount, commentCount는 기본값 0으로 설정됩니다.
+        post.setCategory(category);
 
-        Post savedPost = postRepository.save(post); // 게시글 먼저 저장하여 ID 확보
+        Post savedPost = postRepository.save(post);
 
         // 사진 저장
         int orderIndex = 0;
         if (requestDto.getImageUrls() != null) {
             for (String url : requestDto.getImageUrls()) {
                 Photo photo = new Photo();
-                photo.setTargetId(savedPost.getId()); // 저장된 Post의 ID를 targetId로 설정
-                photo.setTargetType(PhotoTargetType.POST); // PhotoTargetType.POST 지정
+                photo.setTargetId(savedPost.getId());
+                photo.setTargetType(PhotoTargetType.POST);
                 photo.setImageUrl(url);
-                photo.setOrderIndex(orderIndex++); // 순서 부여
+                photo.setOrderIndex(orderIndex++);
                 photoRepository.save(photo);
             }
         }
+
         return savedPost.getId();
     }
 
     /**
      * 기존 게시글을 수정합니다.
-     * 기존 사진을 모두 삭제하고 새로운 사진들로 교체합니다.
      */
     @Transactional
     public void updatePost(Long id, PostRequestDto requestDto) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        // 작성자 ID 변경은 일반적으로 허용되지 않으므로, 요청 DTO의 userId와 현재 게시글의 userId가 일치하는지 확인하는 로직 추가 필요.
-        // 여기서는 예시를 위해 DTO의 userId로 User 객체를 다시 가져오는 코드를 남겨둡니다.
-        User newUser = userRepository.findById(requestDto.getUserId())
+        User user = userRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        post.setUser(newUser); // 만약 작성자 변경을 허용한다면
-        // 혹은, 작성자 변경을 막고 싶다면:
-        // if (!post.getUser().getId().equals(requestDto.getUserId())) {
-        //     throw new IllegalArgumentException("게시글 작성자만 수정할 수 있습니다.");
-        // }
+        post.setUser(user);
 
         post.setTitle(requestDto.getTitle());
         post.setContent(requestDto.getContent());
-        // updatedAt은 @PreUpdate 어노테이션에 의해 자동으로 갱신됩니다.
 
-        // 기존 사진 삭제 (Post ID와 타입으로 삭제)
+        PostCategory category;
+        try {
+            category = PostCategory.valueOf(requestDto.getCategory());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("유효하지 않은 카테고리입니다.");
+        }
+        post.setCategory(category);
+
+        // 기존 사진 삭제
         photoRepository.deleteByTargetIdAndTargetType(id, PhotoTargetType.POST);
 
         // 새 사진 저장
@@ -94,67 +101,68 @@ public class PostService {
         if (requestDto.getImageUrls() != null) {
             for (String url : requestDto.getImageUrls()) {
                 Photo photo = new Photo();
-                photo.setTargetId(post.getId()); // Post의 ID를 targetId로 설정
-                photo.setTargetType(PhotoTargetType.POST); // PhotoTargetType.POST 지정
+                photo.setTargetId(post.getId());
+                photo.setTargetType(PhotoTargetType.POST);
                 photo.setImageUrl(url);
-                photo.setOrderIndex(orderIndex++); // 순서 부여
+                photo.setOrderIndex(orderIndex++);
                 photoRepository.save(photo);
             }
         }
     }
 
     /**
-     * 특정 ID의 게시글을 삭제합니다.
-     * 게시글과 연관된 모든 사진도 함께 삭제됩니다.
+     * 게시글 삭제
      */
     @Transactional
     public void deletePost(Long id) {
         if (!postRepository.existsById(id)) {
             throw new IllegalArgumentException("게시글이 존재하지 않습니다.");
         }
-        // 해당 Post와 연관된 모든 사진 삭제
         photoRepository.deleteByTargetIdAndTargetType(id, PhotoTargetType.POST);
         postRepository.deleteById(id);
     }
 
     /**
-     * 모든 게시글 목록을 조회합니다.
-     * 각 게시글의 사진 정보도 함께 DTO로 변환하여 반환합니다.
+     * 전체 게시글 조회
      */
     public List<PostResponseDto> getAllPosts() {
         return postRepository.findAll().stream()
-                .map(this::convertToDto) // convertToDto 메서드 재사용
+                .map(post -> {
+                    List<Photo> photos = photoRepository.findByTargetIdAndTargetTypeOrderByOrderIndexAsc(post.getId(), PhotoTargetType.POST);
+                    return PostResponseDto.fromEntity(post, photos);
+                })
                 .collect(Collectors.toList());
     }
 
     /**
-     * 특정 사용자가 작성한 게시글 목록을 조회합니다.
-     * 각 게시글의 사진 정보도 함께 DTO로 변환하여 반환합니다.
+     * 사용자별 게시글 조회
      */
     public List<PostResponseDto> getPostsByUserId(Long userId) {
         return postRepository.findByUserId(userId).stream()
-                .map(this::convertToDto)
+                .map(post -> {
+                    List<Photo> photos = photoRepository.findByTargetIdAndTargetTypeOrderByOrderIndexAsc(post.getId(), PhotoTargetType.POST);
+                    return PostResponseDto.fromEntity(post, photos);
+                })
                 .collect(Collectors.toList());
     }
 
-    // 게시글 엔티티를 응답 DTO로 변환하는 내부 공통 메서드
-    private PostResponseDto convertToDto(Post post) {
-        PostResponseDto dto = new PostResponseDto();
-        dto.setId(post.getId());
-        dto.setUserId(post.getUser().getId());
-        dto.setUsername(post.getUser().getUsername()); // User 엔티티에 getUsername() 필요
-        dto.setTitle(post.getTitle());
-        dto.setContent(post.getContent());
-        dto.setLikeCount(post.getLikeCount());
-        dto.setCommentCount(post.getCommentCount());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
+    /**
+     * 카테고리별 게시글 조회
+     */
+    public List<PostResponseDto> findByCategory(String categoryName) {
+        PostCategory category;
+        try {
+            category = PostCategory.valueOf(categoryName);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("존재하지 않는 카테고리입니다: " + categoryName);
+        }
 
-        // PhotoRepository를 사용하여 해당 Post의 사진들을 조회하고 URL만 추출
-        List<String> imageUrls = photoRepository.findByTargetIdAndTargetTypeOrderByOrderIndexAsc(
-                        post.getId(), PhotoTargetType.POST)
-                .stream().map(Photo::getImageUrl).toList();
-        dto.setImageUrls(imageUrls);
-        return dto;
+        List<Post> posts = postRepository.findByCategory(category);
+        return posts.stream()
+                .map(post -> {
+                    List<Photo> photos = photoRepository.findByTargetIdAndTargetTypeOrderByOrderIndexAsc(post.getId(), PhotoTargetType.POST);
+                    return PostResponseDto.fromEntity(post, photos);
+                })
+                .collect(Collectors.toList());
     }
 }

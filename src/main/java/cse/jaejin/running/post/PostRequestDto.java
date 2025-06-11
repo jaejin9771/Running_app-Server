@@ -15,4 +15,5 @@ public class PostRequestDto {
     private String title;       // 게시글 제목
     private String content;     // 게시글 내용
     private List<String> imageUrls; // 첨부될 이미지 URL 목록
+    private String category;
 }

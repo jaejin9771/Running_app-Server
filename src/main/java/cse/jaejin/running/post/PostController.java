@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/posts") // 일반 게시글 API 엔드포인트
+@RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
 
     /**
-     * 특정 ID의 게시글을 조회합니다.
+     * 게시글 단건 조회
      */
     @GetMapping("/{id}")
     public ResponseEntity<PostResponseDto> getPostById(@PathVariable Long id) {
@@ -23,36 +23,36 @@ public class PostController {
     }
 
     /**
-     * 새로운 게시글을 생성합니다.
+     * 게시글 생성
      */
     @PostMapping
     public ResponseEntity<Long> createPost(@RequestBody PostRequestDto requestDto) {
         Long postId = postService.createPost(requestDto);
-        return new ResponseEntity<>(postId, HttpStatus.CREATED); // 생성 시 201 Created 응답
+        return new ResponseEntity<>(postId, HttpStatus.CREATED);
     }
 
     /**
-     * 특정 ID의 게시글을 수정합니다.
+     * 게시글 수정
      */
     @PutMapping("/{id}")
     public ResponseEntity<Void> updatePost(
             @PathVariable Long id,
             @RequestBody PostRequestDto requestDto) {
         postService.updatePost(id, requestDto);
-        return ResponseEntity.ok().build(); // 200 OK
+        return ResponseEntity.ok().build();
     }
 
     /**
-     * 특정 ID의 게시글을 삭제합니다.
+     * 게시글 삭제
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         postService.deletePost(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
 
     /**
-     * 모든 게시글 목록을 조회합니다.
+     * 모든 게시글 조회
      */
     @GetMapping
     public ResponseEntity<List<PostResponseDto>> getAllPosts() {
@@ -60,10 +60,18 @@ public class PostController {
     }
 
     /**
-     * 특정 사용자가 작성한 게시글 목록을 조회합니다.
+     * 사용자별 게시글 조회
      */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<PostResponseDto>> getPostsByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(postService.getPostsByUserId(userId));
+    }
+
+    /**
+     * 카테고리별 게시글 조회
+     */
+    @GetMapping("/category")
+    public ResponseEntity<List<PostResponseDto>> getPostsByCategory(@RequestParam String category) {
+        return ResponseEntity.ok(postService.findByCategory(category));
     }
 }
