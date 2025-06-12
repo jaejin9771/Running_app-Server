@@ -34,6 +34,8 @@ public class User {
 
     private LocalDate birthDate;
 
+    private String profileImageUrl;
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 

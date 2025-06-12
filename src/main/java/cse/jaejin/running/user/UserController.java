@@ -71,4 +71,12 @@ public class UserController {
         return ResponseEntity.ok(UserResponseDto.fromEntity(user));
     }
 
+    @PutMapping("/{id}/profile-image")
+    public ResponseEntity<String> updateProfileImage(
+            @PathVariable Long id,
+            @RequestBody UserProfileImageRequestDto requestDto) {
+        userService.updateProfileImage(id, requestDto.getProfileImageUrl());
+        return ResponseEntity.ok("프로필 이미지가 성공적으로 업데이트되었습니다.");
+    }
+
 }

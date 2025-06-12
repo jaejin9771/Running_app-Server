@@ -57,4 +57,11 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void updateProfileImage(Long userId, String imageUrl) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 ID가 존재하지 않습니다."));
+        user.setProfileImageUrl(imageUrl);
+    }
+
 }

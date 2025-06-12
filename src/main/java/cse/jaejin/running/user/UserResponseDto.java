@@ -15,6 +15,7 @@ public class UserResponseDto {
     private String phone;
     private LocalDate birthDate;
     private Role role;
+    private String profileImageUrl;
 
     private double totalDistance; // 누적 거리
     private String tier;          // 티어
@@ -28,6 +29,7 @@ public class UserResponseDto {
         dto.setPhone(user.getPhone());
         dto.setBirthDate(user.getBirthDate());
         dto.setRole(user.getRole());
+        dto.setProfileImageUrl(user.getProfileImageUrl());
         dto.setTotalDistance(user.getTotalDistance());
         dto.setTier(user.getTier());
         return dto;
