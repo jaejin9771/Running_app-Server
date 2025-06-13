@@ -16,6 +16,7 @@ public class RunningLocationPoint {
 
     private double latitude;
     private double longitude;
+
     private LocalDateTime timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)

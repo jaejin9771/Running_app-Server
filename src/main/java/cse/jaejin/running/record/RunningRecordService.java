@@ -43,6 +43,7 @@ public class RunningRecordService {
                 RunningLocationPoint point = new RunningLocationPoint();
                 point.setLatitude(pointDto.getLatitude());
                 point.setLongitude(pointDto.getLongitude());
+                point.setTimestamp(pointDto.getTimestamp());
                 record.addPoint(point);
             }
         }
@@ -85,6 +86,7 @@ public class RunningRecordService {
             LocationPointDto pd = new LocationPointDto();
             pd.setLatitude(p.getLatitude());
             pd.setLongitude(p.getLongitude());
+            pd.setTimestamp(p.getTimestamp());
             return pd;
         }).collect(Collectors.toList());
 

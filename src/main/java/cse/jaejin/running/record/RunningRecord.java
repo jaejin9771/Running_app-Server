@@ -56,6 +56,7 @@ public class RunningRecord {
     // 평균 속도 계산 (단위: km/h)
     public double getAverageSpeed() {
         if (duration == 0) return 0.0;
-        return (distance / duration) * 3600;
+        double speed = (distance / duration) * 3600;
+        return Math.round(speed * 10.0) / 10.0;
     }
 }
