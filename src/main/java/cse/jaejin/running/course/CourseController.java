@@ -39,10 +39,24 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getCoursesByUser(userId));
     }
 
-    // 사용자 검색
+    // 제목으로 코스 검색
     @GetMapping("/search")
     public ResponseEntity<List<CourseResponseDto>> searchByCourseTitle(@RequestParam String courseTitle) {
         return ResponseEntity.ok(courseService.searchByCourseTitle(courseTitle));
+    }
+
+    // 코스 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
+        courseService.deleteCourse(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 코스 제목 수정
+    @PatchMapping("/{id}/title")
+    public ResponseEntity<Void> updateCourseTitle(@PathVariable Long id, @RequestBody UpdateCourseTitleRequestDto request) {
+        courseService.updateCourseTitle(id, request.getCourseTitle());
+        return ResponseEntity.ok().build();
     }
 
 }

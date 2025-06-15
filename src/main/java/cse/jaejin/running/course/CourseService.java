@@ -116,4 +116,18 @@ public class CourseService {
         dto.setPoints(pointDtos);
         return dto;
     }
+
+    public void deleteCourse(Long id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+        courseRepository.delete(course);
+    }
+
+    public void updateCourseTitle(Long id, String newTitle) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+        course.setCourseTitle(newTitle);
+        courseRepository.save(course);
+    }
+
 }
