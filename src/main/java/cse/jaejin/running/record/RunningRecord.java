@@ -29,6 +29,10 @@ public class RunningRecord {
     @JoinColumn(name = "courseId", nullable = true)
     private Course course;
 
+    // 제목
+    @Column(nullable = false)
+    private String title;
+
     // 총 거리 (단위: km)
     @Column(nullable = false)
     private double distance;

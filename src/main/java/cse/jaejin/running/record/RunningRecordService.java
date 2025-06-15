@@ -33,6 +33,7 @@ public class RunningRecordService {
         RunningRecord record = new RunningRecord();
         record.setUser(user);
         record.setCourse(course);
+        record.setTitle(dto.getTitle());
         record.setDistance(dto.getDistance());
         record.setDuration(dto.getDuration());
         record.setRunDate(dto.getRunDate());
@@ -76,6 +77,7 @@ public class RunningRecordService {
         dto.setId(record.getId());
         dto.setUserId(record.getUser().getId());
         dto.setCourseId(record.getCourse() != null ? record.getCourse().getId() : null);
+        dto.setTitle(record.getTitle());
         dto.setDistance(record.getDistance());
         dto.setDuration(record.getDuration());
         dto.setRunDate(record.getRunDate());

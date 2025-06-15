@@ -11,6 +11,7 @@ public class RunningRecordResponseDto {
     private Long id;
     private Long userId;
     private Long courseId;
+    private String title;
     private double distance;
     private String location;
     private int duration;
