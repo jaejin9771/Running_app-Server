@@ -95,4 +95,11 @@ public class RunningRecordService {
         dto.setPoints(points);
         return dto;
     }
+
+    @Transactional
+    public void updateRunningRecordTitle(Long id, String newTitle) {
+        RunningRecord record = runningRecordRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 러닝 기록이 존재하지 않습니다."));
+        record.setTitle(newTitle);
+    }
 }

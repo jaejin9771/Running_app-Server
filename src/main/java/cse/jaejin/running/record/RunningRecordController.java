@@ -40,4 +40,12 @@ public class RunningRecordController {
         runningRecordService.deleteRunningRecord(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/title")
+    public ResponseEntity<String> updateRunningRecordTitle(
+            @PathVariable Long id,
+            @RequestBody UpdateRunningRecordTitleRequestDto requestDto) {
+        runningRecordService.updateRunningRecordTitle(id, requestDto.getTitle());
+        return ResponseEntity.ok("러닝 기록 제목이 성공적으로 수정되었습니다.");
+    }
 }
