@@ -55,5 +55,20 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token);
     }
+
+    /** 리프레시 토큰 생성 */
+    public String generateRefreshToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtConfig.getRefreshExpirationMs()))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /** 리프레시 토큰 검증 */
+    public boolean validateRefreshToken(String token) {
+        return validateToken(token);
+    }
 }
 

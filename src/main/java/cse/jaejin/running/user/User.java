@@ -36,6 +36,9 @@ public class User {
 
     private String profileImageUrl;
 
+    @Column(length = 1000)
+    private String refreshToken;
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 

@@ -5,15 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @AllArgsConstructor
 public class LoginResponseDto {
     private boolean success;
     private String message;
     private UserDto user;
-    private String token;
+    private String accessToken;
+    private String refreshToken;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     public static class UserDto {
         private Long id;
         private String username;
@@ -36,3 +39,4 @@ public class LoginResponseDto {
         return dto;
     }
 }
+
